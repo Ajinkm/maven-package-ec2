@@ -35,7 +35,7 @@ pipeline {
                 sshagent(['ec2-ssh']) {
 
                     sh '''
-                    scp target/jenkins-demo-1.0.0.jar ec2-user@$EC2_IP:/home/ec2-user/
+                    scp target/jenkins-demo12345-1.0.0.jar ec2-user@$EC2_IP:/home/ec2-user/
 
                     ssh ec2-user@$EC2_IP "
                     pkill -f jenkins-demo || true
