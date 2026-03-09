@@ -12,12 +12,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/Ajinkm/maven-package-ec2.git'
-            }
-        }
-
         stage('Build & Upload Artifact') {
 
             steps {
