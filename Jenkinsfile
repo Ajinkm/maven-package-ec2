@@ -26,17 +26,18 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh']) {
                     sh '''
-                        scp -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_IP:/home/ec2-user/
+                        echo "Copying artifact to EC2..."
+                        scp -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_IP:/home/ec2-user/app.jar
 
-                        ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
-                            pkill -f jar || true
-                            java -jar /home/ec2-user/*.jar &
-                        "
+                        echo "Starting application on EC2..."
+                        ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP '
+                            pkill -f app.jar || true
+                            nohup java -jar /home/ec2-user/app.jar > app.log 2>&1 &
+                        '
                     '''
                 }
             }
         }
 
     }
-
 }
