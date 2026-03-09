@@ -13,40 +13,28 @@ pipeline {
     stages {
 
         stage('Build & Upload Artifact') {
-
             steps {
-
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]) {
-
                     sh '''
-                    mvn clean deploy --settings $MAVEN_SETTINGS
+                        mvn clean deploy --settings $MAVEN_SETTINGS
                     '''
-
                 }
-
             }
-
         }
 
         stage('Deploy to EC2') {
-
             steps {
-
-                sshagent(['ec2-ssh']) {
-
+                sshagent(['ec2-key']) {
                     sh '''
-                    scp target/jenkins-demo12345-1.0.0.jar ec2-user@$EC2_IP:/home/ec2-user/
+                        scp -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_IP:/home/ec2-user/
 
-                    ssh ec2-user@$EC2_IP "
-                    pkill -f jenkins-demo || true
-                    java -jar /home/ec2-user/jenkins-demo-1.0.0.jar &
-                    "
+                        ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
+                            pkill -f jar || true
+                            java -jar /home/ec2-user/*.jar &
+                        "
                     '''
-
                 }
-
             }
-
         }
 
     }
