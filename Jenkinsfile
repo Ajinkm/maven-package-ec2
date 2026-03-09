@@ -16,6 +16,7 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]) {
                     sh '''
+                        echo "Building Maven project and uploading to GitHub Packages..."
                         mvn clean deploy --settings $MAVEN_SETTINGS
                     '''
                 }
@@ -26,14 +27,18 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh']) {
                     sh '''
-                        echo "Copying artifact to EC2..."
+                        echo "Checking artifact in target directory..."
+                        ls -l target
+
+                        echo "Copying JAR to EC2..."
                         scp -o StrictHostKeyChecking=no target/*.jar ec2-user@$EC2_IP:/home/ec2-user/app.jar
 
                         echo "Starting application on EC2..."
-                        ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP '
+                        ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP << 'EOF'
                             pkill -f app.jar || true
-                            nohup java -jar /home/ec2-user/app.jar > app.log 2>&1 &
-                        '
+                            nohup java -jar /home/ec2-user/app.jar > /home/ec2-user/app.log 2>&1 &
+                            exit 0
+                        EOF
                     '''
                 }
             }
